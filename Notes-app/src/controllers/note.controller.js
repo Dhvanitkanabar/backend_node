@@ -30,6 +30,36 @@ const createNote = async (req, res) => {
   }
 };
 
+// CREATE MULTIPLE NOTES
+const createBulkNotes = async (req, res) => {
+  try {
+    const { notes } = req.body;
+
+    if (!notes || notes.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Notes array is required",
+        data: null,
+      });
+    }
+
+    const createdNotes = await Note.insertMany(notes);
+
+    res.status(201).json({
+      success: true,
+      message: `${createdNotes.length} notes created successfully`,
+      data: createdNotes,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
+  createBulkNotes,
 };
