@@ -7,6 +7,7 @@ const {
   getNoteById,
   replaceNote,
   updateNote,
+  deleteNote,
 } = require("../controllers/note.controller");
 
 const router = express.Router();
@@ -22,9 +23,7 @@ router.get("/:id", getNoteById);
 // UPDATE
 router.put("/:id", replaceNote);
 router.patch("/:id", updateNote);
-
-
-
-
+// DELETE
+router.delete("/:id", deleteNote);
 
 module.exports = router;
