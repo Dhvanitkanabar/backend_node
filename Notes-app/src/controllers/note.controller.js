@@ -115,9 +115,51 @@ const getNoteById = async (req, res) => {
   }
 };
 
+// PUT (REPLACE)
+const replaceNote = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID",
+        data: null,
+      });
+    }
+
+    const updatedNote = await Note.findByIdAndUpdate(id, req.body, {
+      new: true,
+      overwrite: true,
+      runValidators: true,
+    });
+
+    if (!updatedNote) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+        data: null,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Note replaced successfully",
+      data: updatedNote,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
   getAllNotes,
   getNoteById,
+  replaceNote,
 };
