@@ -62,9 +62,29 @@ const createBulkNotes = async (req, res) => {
   }
 };
 
+const getAllNotes = async (req, res) => {
+  try {
+    const notes = await Note.find();
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched successfully",
+      count: notes.length,
+      data: notes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
+  getAllNotes,
   isValidObjectId,
   allowedCategories,
   allowedSortFields,
