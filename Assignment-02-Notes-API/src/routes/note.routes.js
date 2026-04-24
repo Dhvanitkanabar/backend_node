@@ -8,7 +8,8 @@ const {
   updateNote, 
   deleteNote, 
   deleteBulkNotes,
-  getNotesByCategory
+  getNotesByCategory,
+  getNotesByStatus
 } = require("../controllers/note.controller");
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.post("/bulk", createBulkNotes);
 router.delete("/bulk", deleteBulkNotes);
 
 router.get("/category/:category", getNotesByCategory);
+router.get("/status/:isPinned", getNotesByStatus);
 
 router.post("/", createNote);
 router.get("/", getAllNotes);
