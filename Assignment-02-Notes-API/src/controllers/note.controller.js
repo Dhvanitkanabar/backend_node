@@ -533,6 +533,44 @@ const paginateNotes = async (req, res) => {
   }
 };
 
+const paginateByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (!allowedCategories.includes(category)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid category. Allowed: work, personal, study",
+        data: null,
+      });
+    }
+
+    const total = await Note.countDocuments({ category });
+    const notes = await Note.find({ category }).skip(skip).limit(limit);
+
+    return res.status(200).json({
+      success: true,
+      message: `Paginated notes fetched for category: ${category}`,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+      data: notes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
@@ -550,6 +588,7 @@ module.exports = {
   filterByCategory,
   filterByDateRange,
   paginateNotes,
+  paginateByCategory,
   isValidObjectId,
   allowedCategories,
   allowedSortFields,
