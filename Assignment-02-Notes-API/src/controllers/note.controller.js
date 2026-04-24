@@ -385,6 +385,39 @@ const getNoteSummary = async (req, res) => {
   }
 };
 
+const filterNotes = async (req, res) => {
+  try {
+    const filter = {};
+
+    if (req.query.category) filter.category = req.query.category;
+    if (req.query.isPinned !== undefined) {
+      if (req.query.isPinned !== "true" && req.query.isPinned !== "false") {
+        return res.status(400).json({
+          success: false,
+          message: "isPinned must be true or false",
+          data: null,
+        });
+      }
+      filter.isPinned = req.query.isPinned === "true";
+    }
+
+    const notes = await Note.find(filter);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched successfully",
+      count: notes.length,
+      data: notes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
@@ -397,6 +430,7 @@ module.exports = {
   getNotesByCategory,
   getNotesByStatus,
   getNoteSummary,
+  filterNotes,
   isValidObjectId,
   allowedCategories,
   allowedSortFields,
