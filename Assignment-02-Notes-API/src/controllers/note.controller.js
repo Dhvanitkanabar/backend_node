@@ -470,6 +470,40 @@ const filterByCategory = async (req, res) => {
   }
 };
 
+const filterByDateRange = async (req, res) => {
+  try {
+    const { from, to } = req.query;
+
+    if (!from || !to) {
+      return res.status(400).json({
+        success: false,
+        message: "Query params 'from' and 'to' (YYYY-MM-DD) are required",
+        data: null,
+      });
+    }
+
+    const notes = await Note.find({
+      createdAt: {
+        $gte: new Date(from),
+        $lte: new Date(to),
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Notes filtered from ${from} to ${to}`,
+      count: notes.length,
+      data: notes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
@@ -485,6 +519,7 @@ module.exports = {
   filterNotes,
   getPinnedNotes,
   filterByCategory,
+  filterByDateRange,
   isValidObjectId,
   allowedCategories,
   allowedSortFields,
