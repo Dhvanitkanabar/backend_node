@@ -355,6 +355,36 @@ const searchAll = async (req, res) => {
   }
 };
 
+const ALLOWED_SORT_FIELDS = ["title", "createdAt", "updatedAt", "category"];
+
+const filterAndSort = async (req, res) => {
+  try {
+    const { category, isPinned, sortBy = "createdAt", order = "desc" } = req.query;
+
+    const filter = {};
+    if (category) filter.category = category;
+    if (isPinned !== undefined) filter.isPinned = isPinned === "true";
+
+    const sortField = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : "createdAt";
+    const sortOrder = order === "asc" ? 1 : -1;
+
+    const notes = await Note.find(filter).sort({ [sortField]: sortOrder });
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched successfully",
+      count: notes.length,
+      data: notes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
@@ -367,4 +397,5 @@ module.exports = {
   searchByTitle,
   searchByContent,
   searchAll,
+  filterAndSort,
 };
