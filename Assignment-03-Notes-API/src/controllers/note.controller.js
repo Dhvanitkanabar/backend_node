@@ -424,6 +424,47 @@ const filterAndPaginate = async (req, res) => {
   }
 };
 
+const sortAndPaginate = async (req, res) => {
+  try {
+    const { sortBy = "createdAt", order = "desc" } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const sortField = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : "createdAt";
+    const sortOrder = order === "asc" ? 1 : -1;
+
+    const total = await Note.countDocuments();
+    const notes = await Note.find()
+      .sort({ [sortField]: sortOrder })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched successfully",
+      count: notes.length,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      data: notes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
@@ -438,4 +479,5 @@ module.exports = {
   searchAll,
   filterAndSort,
   filterAndPaginate,
+  sortAndPaginate,
 };
