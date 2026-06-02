@@ -1,5 +1,8 @@
 const express = require("express");
 
+const auth = require("../middlewares/auth.middleware");
+const logger = require("../middlewares/logger.middleware");
+
 const {
   createNote,
   createBulkNotes,
@@ -13,20 +16,19 @@ const {
 
 const router = express.Router();
 
-// CREATE
-router.post("/bulk", createBulkNotes); 
-router.post("/", createNote);
 
-// READ
-router.get("/", getAllNotes);
-router.get("/:id", getNoteById);
+router.use(logger);
 
-// UPDATE
-router.put("/:id", replaceNote);
-router.patch("/:id", updateNote);
+router.post("/bulk", auth, createBulkNotes);
+router.post("/", auth, createNote);
 
-// DELETE
-router.delete("/bulk", deleteBulkNotes);
-router.delete("/:id", deleteNote);
+router.get("/", auth, getAllNotes);
+router.get("/:id", auth, getNoteById);
+
+router.put("/:id", auth, replaceNote);
+router.patch("/:id", auth, updateNote);
+
+router.delete("/bulk", auth, deleteBulkNotes);
+router.delete("/:id", auth, deleteNote);
 
 module.exports = router;
