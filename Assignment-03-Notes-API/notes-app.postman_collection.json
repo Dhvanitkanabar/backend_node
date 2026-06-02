@@ -1,0 +1,356 @@
+{
+  "info": {
+    "name": "notes-app API",
+    "description": "Notes API - Assignment 03. Covers all 18 endpoints: CRUD, bulk operations, search, filter, sort, pagination, and a master query endpoint.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "noteId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "CRUD",
+      "item": [
+        {
+          "name": "Create Note (POST /api/notes)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Team meeting notes\",\n  \"content\": \"Discuss Q3 roadmap and deployment plan.\",\n  \"category\": \"work\",\n  \"isPinned\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Create a single note. Returns 400 if title or content is missing."
+          }
+        },
+        {
+          "name": "Create Bulk Notes (POST /api/notes/bulk)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": [\n    { \"title\": \"React hooks\",   \"content\": \"useState, useEffect basics\", \"category\": \"study\" },\n    { \"title\": \"Grocery list\",  \"content\": \"Milk, eggs, bread\",          \"category\": \"personal\" },\n    { \"title\": \"Deployment\",    \"content\": \"Deploy backend on Render\",   \"category\": \"work\", \"isPinned\": true }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "bulk"]
+            },
+            "description": "Create multiple notes at once using Note.insertMany(). 400 if notes array is missing or empty."
+          }
+        },
+        {
+          "name": "Get All Notes (GET /api/notes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Fetch every note in the database. Response includes count."
+          }
+        },
+        {
+          "name": "Get Note By ID (GET /api/notes/:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "{{noteId}}"]
+            },
+            "description": "Fetch a single note. 400 for invalid ObjectId, 404 if not found."
+          }
+        },
+        {
+          "name": "Replace Note (PUT /api/notes/:id)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Replaced title\",\n  \"content\": \"This note was fully replaced.\",\n  \"category\": \"personal\",\n  \"isPinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "{{noteId}}"]
+            },
+            "description": "Full replacement using { new: true, overwrite: true, runValidators: true }."
+          }
+        },
+        {
+          "name": "Update Note (PATCH /api/notes/:id)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isPinned\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "{{noteId}}"]
+            },
+            "description": "Partial update using { new: true, runValidators: true }. 400 if body is empty."
+          }
+        },
+        {
+          "name": "Delete Note (DELETE /api/notes/:id)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "{{noteId}}"]
+            },
+            "description": "Delete a single note. 400 for invalid ObjectId, 404 if not found."
+          }
+        },
+        {
+          "name": "Delete Bulk Notes (DELETE /api/notes/bulk)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"REPLACE_WITH_OBJECT_ID_1\",\n    \"REPLACE_WITH_OBJECT_ID_2\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "bulk"]
+            },
+            "description": "Delete multiple notes using Note.deleteMany({ _id: { $in: ids } }). 400 if ids array is missing or empty."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search By Title (GET /api/notes/search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/search?q=meeting",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "search"],
+              "query": [
+                { "key": "q", "value": "meeting" }
+              ]
+            },
+            "description": "Case-insensitive regex search on the title field. 400 if q is missing."
+          }
+        },
+        {
+          "name": "Search By Content (GET /api/notes/search/content)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/search/content?q=deployment",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "search", "content"],
+              "query": [
+                { "key": "q", "value": "deployment" }
+              ]
+            },
+            "description": "Case-insensitive regex search on the content field. 400 if q is missing."
+          }
+        },
+        {
+          "name": "Search All (GET /api/notes/search/all)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/search/all?q=react",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "search", "all"],
+              "query": [
+                { "key": "q", "value": "react" }
+              ]
+            },
+            "description": "Search both title and content using $or. 400 if q is missing."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Filter / Sort / Paginate",
+      "item": [
+        {
+          "name": "Filter & Sort (GET /api/notes/filter-sort)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/filter-sort?category=work&isPinned=true&sortBy=createdAt&order=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "filter-sort"],
+              "query": [
+                { "key": "category", "value": "work" },
+                { "key": "isPinned", "value": "true" },
+                { "key": "sortBy",   "value": "createdAt" },
+                { "key": "order",    "value": "desc" }
+              ]
+            },
+            "description": "Filter by category and/or isPinned, then sort. Allowed sortBy fields: title, createdAt, updatedAt, category."
+          }
+        },
+        {
+          "name": "Filter & Paginate (GET /api/notes/filter-paginate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/filter-paginate?category=work&isPinned=true&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "filter-paginate"],
+              "query": [
+                { "key": "category", "value": "work" },
+                { "key": "isPinned", "value": "true" },
+                { "key": "page",     "value": "1" },
+                { "key": "limit",    "value": "10" }
+              ]
+            },
+            "description": "Filter then paginate. Returns pagination object with total, page, limit, totalPages, hasNextPage, hasPrevPage."
+          }
+        },
+        {
+          "name": "Sort & Paginate (GET /api/notes/sort-paginate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/sort-paginate?sortBy=createdAt&order=desc&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "sort-paginate"],
+              "query": [
+                { "key": "sortBy", "value": "createdAt" },
+                { "key": "order",  "value": "desc" },
+                { "key": "page",   "value": "1" },
+                { "key": "limit",  "value": "10" }
+              ]
+            },
+            "description": "Sort then paginate (no filtering)."
+          }
+        },
+        {
+          "name": "Search & Filter (GET /api/notes/search-filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/search-filter?q=react&category=study&isPinned=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "search-filter"],
+              "query": [
+                { "key": "q",        "value": "react" },
+                { "key": "category", "value": "study" },
+                { "key": "isPinned", "value": "false" }
+              ]
+            },
+            "description": "Search title + content via $or, combined with optional category / isPinned filters. 400 if q is missing."
+          }
+        },
+        {
+          "name": "Search Sort Paginate (GET /api/notes/search-sort-paginate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/search-sort-paginate?q=react&sortBy=createdAt&order=desc&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "search-sort-paginate"],
+              "query": [
+                { "key": "q",      "value": "react" },
+                { "key": "sortBy", "value": "createdAt" },
+                { "key": "order",  "value": "desc" },
+                { "key": "page",   "value": "1" },
+                { "key": "limit",  "value": "10" }
+              ]
+            },
+            "description": "Search title + content, sort, then paginate. 400 if q is missing."
+          }
+        },
+        {
+          "name": "Filter Sort Paginate (GET /api/notes/filter-sort-paginate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/filter-sort-paginate?category=work&isPinned=true&sortBy=createdAt&order=desc&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "filter-sort-paginate"],
+              "query": [
+                { "key": "category", "value": "work" },
+                { "key": "isPinned", "value": "true" },
+                { "key": "sortBy",   "value": "createdAt" },
+                { "key": "order",    "value": "desc" },
+                { "key": "page",     "value": "1" },
+                { "key": "limit",    "value": "10" }
+              ]
+            },
+            "description": "Filter, sort, then paginate."
+          }
+        },
+        {
+          "name": "Master Query (GET /api/notes/query)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/query?q=meeting&category=work&isPinned=true&sortBy=createdAt&order=desc&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "query"],
+              "query": [
+                { "key": "q",        "value": "meeting" },
+                { "key": "category", "value": "work" },
+                { "key": "isPinned", "value": "true" },
+                { "key": "sortBy",   "value": "createdAt" },
+                { "key": "order",    "value": "desc" },
+                { "key": "page",     "value": "1" },
+                { "key": "limit",    "value": "10" }
+              ]
+            },
+            "description": "Master endpoint. Every param is optional. Supports search + filter + sort + pagination together."
+          }
+        }
+      ]
+    }
+  ]
+}
